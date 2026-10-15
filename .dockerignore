@@ -1,0 +1,6 @@
+.git
+**/node_modules
+**/dist
+data/*.db
+data/raw/*
+**/__pycache__
