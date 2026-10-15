@@ -6,7 +6,21 @@ interface SearchBarProps {
 
 export function SearchBar({ value, loading, onChange }: SearchBarProps) {
   return (
-    <div className="relative">
+    <div className="flex w-full items-center gap-3 rounded-2xl border border-[#1E293B] bg-[#0F172A]/80 p-4 backdrop-blur-md transition-all duration-300 focus-within:border-violet-500/50 focus-within:shadow-[0_0_30px_rgba(139,92,246,0.1)] focus-within:ring-2 focus-within:ring-violet-500/10">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5 shrink-0 text-slate-500"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+
       <input
         autoFocus
         type="text"
@@ -18,31 +32,30 @@ export function SearchBar({ value, loading, onChange }: SearchBarProps) {
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
-        className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 pr-11 text-lg text-neutral-900 placeholder:text-neutral-400 shadow-sm outline-none transition focus:border-neutral-400 focus:ring-4 focus:ring-neutral-200/60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-neutral-600 dark:focus:ring-neutral-800"
+        className="w-full bg-transparent text-lg font-medium tracking-tight text-white outline-none placeholder:text-slate-500"
       />
+
       {loading && (
-        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-          <svg
-            className="h-4 w-4 animate-spin text-neutral-400"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            />
-          </svg>
-        </span>
+        <svg
+          className="h-5 w-5 shrink-0 animate-spin text-violet-400"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          />
+        </svg>
       )}
     </div>
   )

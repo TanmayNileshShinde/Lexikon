@@ -28,7 +28,7 @@ export function Search({
     <section>
       <SearchBar value={query} loading={loading} onChange={onQueryChange} />
       {status === 'ready' && results.length > 0 && (
-        <p className="mt-3 text-xs text-neutral-400 dark:text-neutral-500">
+        <p className="mt-3 px-1 text-xs font-medium uppercase tracking-widest text-slate-500">
           {results.length} {results.length === 1 ? 'result' : 'results'}
         </p>
       )}

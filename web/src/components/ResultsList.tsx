@@ -17,14 +17,12 @@ export function ResultsList({
   onSelect,
 }: ResultsListProps) {
   if (error) {
-    return (
-      <p className="mt-6 text-sm text-red-600 dark:text-red-400">{error}</p>
-    )
+    return <p className="mt-6 text-sm text-rose-400">{error}</p>
   }
 
   if (!hasQuery) {
     return (
-      <p className="mt-6 text-sm text-neutral-400 dark:text-neutral-500">
+      <p className="mt-6 text-sm text-slate-500">
         Type a German word to see its English translation.
       </p>
     )
@@ -32,15 +30,11 @@ export function ResultsList({
 
   if (results.length === 0) {
     if (loading) return null
-    return (
-      <p className="mt-6 text-sm text-neutral-400 dark:text-neutral-500">
-        No results found.
-      </p>
-    )
+    return <p className="mt-6 text-sm text-slate-500">No results found.</p>
   }
 
   return (
-    <ul className="mt-4 flex flex-col gap-2">
+    <ul className="mt-4 flex flex-col gap-3">
       {results.map((result) => (
         <ResultCard
           key={`${result.id}-${result.kind}`}

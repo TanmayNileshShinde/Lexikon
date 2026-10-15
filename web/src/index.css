@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 html,
@@ -12,6 +12,7 @@ body,
 
 body {
   margin: 0;
+  background-color: #060814;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

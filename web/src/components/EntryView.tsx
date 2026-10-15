@@ -21,20 +21,6 @@ const RELATION_LABELS: { key: RelationKey; label: string }[] = [
   { key: 'coordinate_terms', label: 'Coordinate terms' },
 ]
 
-/** Solid, vibrant part-of-speech badges. */
-const POS_STYLES: Record<string, string> = {
-  noun: 'bg-purple-600',
-  verb: 'bg-sky-600',
-  adj: 'bg-amber-500',
-  adv: 'bg-teal-600',
-  name: 'bg-rose-600',
-  phrase: 'bg-indigo-600',
-}
-const POS_FALLBACK = 'bg-slate-500'
-
-const BADGE =
-  'inline-flex items-center rounded px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white'
-
 /** Drop malformed strings (lone surrogates / U+FFFD) from the kaikki IPA data. */
 function isWellFormed(s: string): boolean {
   const withoutPairs = s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')
@@ -65,17 +51,20 @@ function relationSections(entry: Entry): { label: string; items: RelationItem[] 
 }
 
 function PosBadge({ pos }: { pos: string }) {
-  return <span className={`${BADGE} ${POS_STYLES[pos] ?? POS_FALLBACK}`}>{pos}</span>
+  return (
+    <span className="rounded-xl border border-violet-800 bg-violet-950/80 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-violet-300">
+      {pos}
+    </span>
+  )
 }
 
-/** Dark label badge attached to a light value badge, e.g. [Plural | Dächer]. */
 function FormBadge({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex overflow-hidden rounded text-xs font-bold shadow-sm">
-      <span className="bg-neutral-800 px-2 py-0.5 uppercase tracking-wide text-neutral-50 dark:bg-neutral-200 dark:text-neutral-900">
+    <span className="inline-flex items-stretch">
+      <span className="rounded-l-xl border border-slate-700/60 bg-slate-800/60 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
         {label}
       </span>
-      <span className="bg-neutral-100 px-2 py-0.5 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+      <span className="rounded-r-xl border border-l-0 border-slate-700/60 bg-white/10 px-3 py-1 text-sm font-semibold text-white">
         {value}
       </span>
     </span>
@@ -97,24 +86,50 @@ function EntryDetails({
   return (
     <article className="flex flex-col gap-8">
       <header>
-        <h2 className="text-5xl font-bold tracking-tight text-neutral-900 sm:text-6xl dark:text-white">
-          {entry.word}
-        </h2>
+        <div className="flex items-baseline gap-4">
+          <h2 className="text-5xl font-black tracking-tight text-white md:text-6xl">
+            {entry.word}
+          </h2>
+          <span
+            title="Audio coming soon"
+            aria-label="Pronunciation audio coming soon"
+            className="cursor-pointer text-slate-500 transition-colors hover:text-violet-400"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <path d="M11 5 6 9H2v6h4l5 4V5z" />
+              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+            </svg>
+          </span>
+        </div>
 
         {ipas.length > 0 && (
-          <p className="mt-1 font-mono text-base text-neutral-400 dark:text-neutral-500">
+          <p className="mt-1 font-mono text-lg text-slate-400">
             {ipas.join('  ·  ')}
           </p>
         )}
 
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+        <div className="mt-5 flex flex-wrap items-center gap-2">
           <PosBadge pos={entry.pos} />
-          <ArticleChips article={entry.article} variant="solid" />
+          <ArticleChips article={entry.article} />
           {entry.separable && (
-            <span className={`${BADGE} bg-orange-500`}>separable</span>
+            <span className="rounded-xl border border-amber-800 bg-amber-950/80 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-amber-300">
+              separable
+            </span>
           )}
           {!entry.article && entry.gender && (
-            <span className={`${BADGE} bg-neutral-500`}>{entry.gender}</span>
+            <span className="rounded-xl border border-slate-700 bg-slate-800/60 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-slate-300">
+              {entry.gender}
+            </span>
           )}
           {fields.map((field) => (
             <FormBadge
@@ -127,16 +142,13 @@ function EntryDetails({
       </header>
 
       {senses.length > 0 && (
-        <ol className="flex list-decimal flex-col gap-4 pl-5 marker:font-semibold marker:text-neutral-400 dark:marker:text-neutral-600">
+        <ol className="flex list-decimal flex-col gap-5 pl-6 marker:font-semibold marker:text-violet-500/70">
           {senses.map((sense, i) => (
             <li key={i} className="pl-1">
-              <p className="text-lg font-medium leading-relaxed text-neutral-900 dark:text-white">
+              <p className="text-[1.05rem] font-semibold leading-relaxed text-slate-100">
                 {sense.glosses[0]}
                 {sense.glosses.slice(1).map((gloss, gi) => (
-                  <span
-                    key={gi}
-                    className="font-normal text-neutral-500 dark:text-neutral-400"
-                  >
+                  <span key={gi} className="font-normal text-slate-400">
                     , {gloss}
                   </span>
                 ))}
@@ -144,15 +156,11 @@ function EntryDetails({
               {sense.examples?.map((example, ei) => (
                 <blockquote
                   key={ei}
-                  className="mt-2 border-l-2 border-neutral-200 pl-4 dark:border-neutral-700"
+                  className="mt-2 flex flex-col gap-1 rounded-r-xl border-l-2 border-violet-500 bg-slate-900/40 py-2.5 pl-4 pr-3 text-sm italic text-slate-300 transition-all duration-300 hover:bg-slate-900/60"
                 >
-                  <p className="text-sm italic text-neutral-600 dark:text-neutral-300">
-                    {example.text}
-                  </p>
+                  <span>{example.text}</span>
                   {example.en && (
-                    <p className="mt-0.5 text-sm italic text-neutral-400 dark:text-neutral-500">
-                      {example.en}
-                    </p>
+                    <span className="text-slate-500">{example.en}</span>
                   )}
                 </blockquote>
               ))}
@@ -163,23 +171,20 @@ function EntryDetails({
 
       {relations.map((section) => (
         <section key={section.label}>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+          <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             {section.label}
           </h3>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {section.items.map((item) => (
               <button
                 key={item.word}
                 type="button"
                 onClick={() => onSelectTerm(item.word)}
-                className="cursor-pointer rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm text-neutral-700 shadow-sm transition-colors hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                className="flex cursor-pointer items-center rounded-xl border border-slate-800 bg-[#0F172A]/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition-all duration-300 hover:border-violet-800/50 hover:bg-violet-950/40 hover:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
               >
                 {item.word}
                 {item.roman && (
-                  <span className="text-neutral-400 dark:text-neutral-500">
-                    {' '}
-                    · {item.roman}
-                  </span>
+                  <span className="ml-1 text-slate-500">· {item.roman}</span>
                 )}
               </button>
             ))}
@@ -194,23 +199,22 @@ export function EntryView({ id, onBack, onSelectTerm }: EntryViewProps) {
   const { entry, status, error } = useEntry(id)
 
   return (
-    <section className="animate-fade-in-up flex flex-col gap-6">
+    <section className="animate-fade-in-up">
       <button
         type="button"
         onClick={onBack}
-        className="cursor-pointer self-start text-sm text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 dark:text-neutral-400 dark:hover:text-neutral-100"
+        className="group mb-6 flex cursor-pointer items-center gap-2 text-sm text-slate-400 transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
       >
-        ← Back to search
+        <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">
+          ←
+        </span>
+        Back to search
       </button>
 
-      {status === 'loading' && (
-        <p className="text-sm text-neutral-400 dark:text-neutral-500">
-          Loading…
-        </p>
-      )}
+      {status === 'loading' && <p className="text-sm text-slate-500">Loading…</p>}
 
       {status === 'error' && (
-        <p className="text-sm text-red-600 dark:text-red-400">
+        <p className="text-sm text-rose-400">
           {error ?? 'Could not load this entry.'}
         </p>
       )}
