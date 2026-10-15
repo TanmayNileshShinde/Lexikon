@@ -1,0 +1,7 @@
+# Phase 1 - data ingest (Python 3.10+)
+#
+# Runtime code uses only the standard library (json, sqlite3, unicodedata,
+# argparse, pathlib, time) - there are no hard third-party dependencies.
+# tqdm is optional and only provides the progress bar for large dumps;
+# ingest.py falls back to plain log lines without it.
+tqdm>=4.66

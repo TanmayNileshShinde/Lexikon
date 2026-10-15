@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Data (raw dumps + built databases - regenerate via ingest/ingest.py)
+data/raw/*
+!data/raw/.gitkeep
+data/*.db
+
+# Node / frontend (Phase 3+)
+node_modules/
+dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
