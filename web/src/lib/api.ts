@@ -40,6 +40,13 @@ export interface Sound {
   tags?: string[]
 }
 
+/** A native-speaker recording (Wikimedia Commons). mp3 plays everywhere. */
+export interface AudioClip {
+  mp3?: string
+  ogg?: string
+  tags?: string[]
+}
+
 export interface RelationItem {
   word: string
   roman?: string
@@ -68,6 +75,7 @@ export interface Entry {
   forms?: Form[]
   senses?: Sense[]
   sounds?: Sound[]
+  audio?: AudioClip[]
   auxiliary?: string
   separable?: boolean
   synonyms?: RelationItem[]

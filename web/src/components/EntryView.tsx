@@ -87,6 +87,7 @@ function EntryDetails({
   const [isPlaying, setIsPlaying] = useState(false)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   // Track the available voices (they load asynchronously in most browsers).
   useEffect(() => {
@@ -98,9 +99,11 @@ function EntryDetails({
     return () => synth.removeEventListener('voiceschanged', loadVoices)
   }, [])
 
-  // Stop any speech when leaving the entry or switching to a different word.
+  // Stop any sound when leaving the entry or switching to a different word.
   useEffect(() => {
     return () => {
+      audioRef.current?.pause()
+      audioRef.current = null
       window.speechSynthesis?.cancel()
     }
   }, [entry.word])
@@ -108,10 +111,19 @@ function EntryDetails({
   const germanVoices = voices.filter((v) =>
     v.lang.replace('_', '-').toLowerCase().startsWith('de'),
   )
+  const clips = (entry.audio ?? []).filter((c) => c.mp3 || c.ogg)
+  const canSpeak = germanVoices.length > 0
+  // A recording always works; TTS only if a German voice is installed.
+  // Never speak with a non-German voice: it mispronounces (Mädchen -> "machen").
+  const canPlay = clips.length > 0 || canSpeak
 
-  const playAudio = () => {
+  const speak = () => {
     const synth = window.speechSynthesis
-    if (!synth) return
+    const german =
+      germanVoices.find(
+        (v) => v.lang.replace('_', '-').toLowerCase() === 'de-de',
+      ) ?? germanVoices[0]
+    if (!synth || !german) return
 
     // Cancel anything already playing so utterances never overlap.
     synth.cancel()
@@ -120,13 +132,7 @@ function EntryDetails({
     const utterance = new SpeechSynthesisUtterance(entry.word)
     utterance.lang = 'de-DE'
     utterance.rate = 0.95
-
-    // Prefer an exact de-DE voice, else any German one.
-    const german =
-      voices.find(
-        (v) => v.lang.replace('_', '-').toLowerCase() === 'de-de',
-      ) ?? germanVoices[0]
-    if (german) utterance.voice = german
+    utterance.voice = german
 
     utterance.onstart = () => setIsPlaying(true)
     utterance.onend = () => setIsPlaying(false)
@@ -136,6 +142,31 @@ function EntryDetails({
     // cancel() a tick — Chrome drops an utterance spoken in the same tick.
     utteranceRef.current = utterance
     window.setTimeout(() => synth.speak(utterance), 60)
+  }
+
+  const playAudio = () => {
+    audioRef.current?.pause()
+    window.speechSynthesis?.cancel()
+
+    // Prefer a real recording; fall back to a German TTS voice if one exists.
+    const clip = clips[0]
+    const src = clip?.mp3 ?? clip?.ogg
+    if (!src) {
+      speak()
+      return
+    }
+    const audio = new Audio(src)
+    audioRef.current = audio
+    audio.onplay = () => setIsPlaying(true)
+    audio.onended = () => setIsPlaying(false)
+    audio.onerror = () => {
+      setIsPlaying(false)
+      speak()
+    }
+    audio.play().catch(() => {
+      setIsPlaying(false)
+      speak()
+    })
   }
 
   return (
@@ -148,9 +179,14 @@ function EntryDetails({
           <button
             type="button"
             onClick={playAudio}
+            disabled={!canPlay}
             aria-label="Listen to pronunciation"
-            title="Listen to pronunciation"
-            className={`cursor-pointer transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+            title={
+              canPlay
+                ? 'Listen to pronunciation'
+                : 'No recording or German voice available on this device'
+            }
+            className={`transition-colors enabled:cursor-pointer enabled:hover:text-violet-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
               isPlaying ? 'animate-pulse text-violet-400' : 'text-slate-500'
             }`}
           >
