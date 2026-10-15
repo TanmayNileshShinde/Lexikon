@@ -327,6 +327,38 @@ def _extract_sounds(entry: dict) -> list[dict]:
     return sounds
 
 
+AUDIO_URL_PREFIX = "https://upload.wikimedia.org/"
+
+
+def _extract_audio(entry: dict) -> list[dict]:
+    """Native-speaker recordings (Wikimedia Commons) attached to the entry.
+
+    Each item carries an ``mp3`` and/or ``ogg`` URL (mp3 first: Safari cannot
+    play Ogg) plus the regional tags (e.g. ``Germany``, ``Austria``).
+    """
+    audio = []
+    seen = set()
+    for sound in entry.get("sounds") or []:
+        if not isinstance(sound, dict):
+            continue
+        item = {}
+        for key, field in (("mp3", "mp3_url"), ("ogg", "ogg_url")):
+            url = sound.get(field)
+            if isinstance(url, str) and url.startswith(AUDIO_URL_PREFIX):
+                item[key] = url
+        if not item:
+            continue
+        marker = item.get("mp3") or item["ogg"]
+        if marker in seen:
+            continue
+        seen.add(marker)
+        tags = [t for t in sound.get("tags") or [] if isinstance(t, str) and t]
+        if tags:
+            item["tags"] = tags
+        audio.append(item)
+    return audio
+
+
 def _inflection_target(entry: dict) -> tuple[str, str] | None:
     """If every sense inflects another word, return (lemma, pos) instead of
     storing this page as a standalone entry."""
@@ -368,6 +400,9 @@ def _build_record(entry: dict, word: str, pos: str, senses: list[dict]) -> dict:
     sounds = _extract_sounds(entry)
     if sounds:
         record["sounds"] = sounds
+    audio = _extract_audio(entry)
+    if audio:
+        record["audio"] = audio
     record.update(_relations(entry))
     return record
 
