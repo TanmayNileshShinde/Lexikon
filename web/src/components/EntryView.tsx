@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { Entry, RelationItem, RelationKey } from '../lib/api'
 import { morphFields } from '../lib/morphology'
 import { useEntry } from '../lib/useEntry'
@@ -83,6 +84,60 @@ function EntryDetails({
   const senses = entry.senses ?? []
   const relations = relationSections(entry)
 
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+
+  // Track the available voices (they load asynchronously in most browsers).
+  useEffect(() => {
+    const synth = window.speechSynthesis
+    if (!synth) return
+    const loadVoices = () => setVoices(synth.getVoices())
+    loadVoices()
+    synth.addEventListener('voiceschanged', loadVoices)
+    return () => synth.removeEventListener('voiceschanged', loadVoices)
+  }, [])
+
+  // Stop any speech when leaving the entry or switching to a different word.
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis?.cancel()
+    }
+  }, [entry.word])
+
+  const germanVoices = voices.filter((v) =>
+    v.lang.replace('_', '-').toLowerCase().startsWith('de'),
+  )
+
+  const playAudio = () => {
+    const synth = window.speechSynthesis
+    if (!synth) return
+
+    // Cancel anything already playing so utterances never overlap.
+    synth.cancel()
+    synth.resume() // Chrome can leave the engine in a "paused" state
+
+    const utterance = new SpeechSynthesisUtterance(entry.word)
+    utterance.lang = 'de-DE'
+    utterance.rate = 0.95
+
+    // Prefer an exact de-DE voice, else any German one.
+    const german =
+      voices.find(
+        (v) => v.lang.replace('_', '-').toLowerCase() === 'de-de',
+      ) ?? germanVoices[0]
+    if (german) utterance.voice = german
+
+    utterance.onstart = () => setIsPlaying(true)
+    utterance.onend = () => setIsPlaying(false)
+    utterance.onerror = () => setIsPlaying(false)
+
+    // Keep a reference so the utterance isn't garbage-collected, and give
+    // cancel() a tick — Chrome drops an utterance spoken in the same tick.
+    utteranceRef.current = utterance
+    window.setTimeout(() => synth.speak(utterance), 60)
+  }
+
   return (
     <article className="flex flex-col gap-8">
       <header>
@@ -90,10 +145,14 @@ function EntryDetails({
           <h2 className="text-5xl font-black tracking-tight text-white md:text-6xl">
             {entry.word}
           </h2>
-          <span
-            title="Audio coming soon"
-            aria-label="Pronunciation audio coming soon"
-            className="cursor-pointer text-slate-500 transition-colors hover:text-violet-400"
+          <button
+            type="button"
+            onClick={playAudio}
+            aria-label="Listen to pronunciation"
+            title="Listen to pronunciation"
+            className={`cursor-pointer transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+              isPlaying ? 'animate-pulse text-violet-400' : 'text-slate-500'
+            }`}
           >
             <svg
               aria-hidden="true"
@@ -109,7 +168,7 @@ function EntryDetails({
               <path d="M15.5 8.5a5 5 0 0 1 0 7" />
               <path d="M18.5 5.5a9 9 0 0 1 0 13" />
             </svg>
-          </span>
+          </button>
         </div>
 
         {ipas.length > 0 && (

@@ -28,7 +28,7 @@ export default function App() {
         <header className="mb-8">
           <div className="flex items-center gap-3">
             <h1 className="bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
-              German Dictionary
+              Lexikon
             </h1>
             <span className="rounded-full border border-slate-700/60 bg-slate-800/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               V1.0
