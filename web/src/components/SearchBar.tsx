@@ -14,7 +14,7 @@ export function SearchBar({
   onKeyDown,
 }: SearchBarProps) {
   return (
-    <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 backdrop-blur-md transition-all duration-300 focus-within:border-violet-500/50 focus-within:shadow-[0_0_30px_rgba(139,92,246,0.1)] focus-within:ring-2 focus-within:ring-violet-500/10">
+    <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 transition-all duration-300 focus-within:border-violet-500/50 focus-within:ring-2 focus-within:ring-violet-500/10">
       <svg
         aria-hidden="true"
         viewBox="0 0 24 24"
