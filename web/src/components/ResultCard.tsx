@@ -1,28 +1,54 @@
+import { useEffect, useRef } from 'react'
 import type { SuggestResult } from '../lib/api'
 import { ArticleChips } from './ArticleChips'
 
 interface ResultCardProps {
   result: SuggestResult
   onSelect: (id: number) => void
+  isKeyboardSelected?: boolean
 }
 
-export function ResultCard({ result, onSelect }: ResultCardProps) {
+export function ResultCard({
+  result,
+  onSelect,
+  isKeyboardSelected = false,
+}: ResultCardProps) {
+  const ref = useRef<HTMLLIElement>(null)
+
+  // Keep the keyboard-highlighted result visible within the viewport.
+  useEffect(() => {
+    if (isKeyboardSelected) {
+      ref.current?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [isKeyboardSelected])
+
   return (
-    <li className="list-none">
+    <li ref={ref} className="list-none">
       <button
         type="button"
         onClick={() => onSelect(result.id)}
         aria-label={`Open full entry for ${result.word}`}
-        className="group relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border border-slate-800/40 bg-[#0F172A]/40 p-5 text-left shadow-lg transition-all duration-300 hover:border-slate-700/60 hover:bg-[#1E293B]/40 hover:shadow-2xl active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+        aria-current={isKeyboardSelected ? 'true' : undefined}
+        className={`group relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:border-slate-700/60 hover:bg-[#1E293B]/40 hover:shadow-2xl active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+          isKeyboardSelected
+            ? 'border-slate-700/60 bg-[#1E293B]/40 shadow-2xl'
+            : 'border-slate-800/40 bg-[#0F172A]/40 shadow-lg'
+        }`}
       >
         {/* left accent */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 w-0.5 origin-center scale-y-0 bg-gradient-to-b from-violet-500 to-cyan-400 transition-transform duration-300 group-hover:scale-y-100"
+          className={`pointer-events-none absolute inset-y-0 left-0 w-0.5 origin-center bg-gradient-to-b from-violet-500 to-cyan-400 transition-transform duration-300 group-hover:scale-y-100 ${
+            isKeyboardSelected ? 'scale-y-100' : 'scale-y-0'
+          }`}
         />
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <span className="text-lg font-bold text-slate-100 transition-colors group-hover:text-violet-400">
+          <span
+            className={`text-lg font-bold transition-colors group-hover:text-violet-400 ${
+              isKeyboardSelected ? 'text-violet-400' : 'text-slate-100'
+            }`}
+          >
             {result.word}
           </span>
           <ArticleChips article={result.article} />

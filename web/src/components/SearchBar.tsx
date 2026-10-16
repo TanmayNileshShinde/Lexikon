@@ -1,10 +1,18 @@
+import type { KeyboardEvent } from 'react'
+
 interface SearchBarProps {
   value: string
   loading: boolean
   onChange: (value: string) => void
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
 }
 
-export function SearchBar({ value, loading, onChange }: SearchBarProps) {
+export function SearchBar({
+  value,
+  loading,
+  onChange,
+  onKeyDown,
+}: SearchBarProps) {
   return (
     <div className="flex w-full items-center gap-3 rounded-2xl border border-[#1E293B] bg-[#0F172A]/80 p-4 backdrop-blur-md transition-all duration-300 focus-within:border-violet-500/50 focus-within:shadow-[0_0_30px_rgba(139,92,246,0.1)] focus-within:ring-2 focus-within:ring-violet-500/10">
       <svg
@@ -26,6 +34,7 @@ export function SearchBar({ value, loading, onChange }: SearchBarProps) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder="Search a German word…"
         aria-label="Search a German word"
         spellCheck={false}

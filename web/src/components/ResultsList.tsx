@@ -7,6 +7,7 @@ interface ResultsListProps {
   hasQuery: boolean
   error: string | null
   onSelect: (id: number) => void
+  selectedIndex: number
 }
 
 export function ResultsList({
@@ -15,6 +16,7 @@ export function ResultsList({
   hasQuery,
   error,
   onSelect,
+  selectedIndex,
 }: ResultsListProps) {
   if (error) {
     return <p className="mt-6 text-sm text-rose-400">{error}</p>
@@ -35,11 +37,12 @@ export function ResultsList({
 
   return (
     <ul className="mt-4 flex flex-col gap-3">
-      {results.map((result) => (
+      {results.map((result, index) => (
         <ResultCard
           key={`${result.id}-${result.kind}`}
           result={result}
           onSelect={onSelect}
+          isKeyboardSelected={index === selectedIndex}
         />
       ))}
     </ul>
