@@ -117,6 +117,25 @@ export async function fetchSuggest(
   return (await res.json()) as SuggestResponse
 }
 
+export interface AutocompleteItem {
+  id: number
+  word: string
+  pos: string
+}
+
+export async function fetchAutocomplete(
+  query: string,
+  signal: AbortSignal,
+): Promise<AutocompleteItem[]> {
+  const url = `${API_BASE}/api/autocomplete?q=${encodeURIComponent(query)}&limit=8`
+  const res = await fetch(url, { signal })
+  if (!res.ok) {
+    throw new ApiError(res.status, `autocomplete request failed (${res.status})`)
+  }
+  const data = (await res.json()) as { suggestions: AutocompleteItem[] }
+  return data.suggestions
+}
+
 export async function fetchEntry(
   id: number,
   signal: AbortSignal,
