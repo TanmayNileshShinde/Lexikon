@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Entry, RelationItem, RelationKey } from '../lib/api'
 import { morphFields } from '../lib/morphology'
+import { playNormalized } from '../lib/normalizedAudio'
 import { useEntry } from '../lib/useEntry'
 import { ArticleChips } from './ArticleChips'
 
@@ -87,7 +88,8 @@ function EntryDetails({
   const [isPlaying, setIsPlaying] = useState(false)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const stopAudioRef = useRef<(() => void) | null>(null)
+  const playTokenRef = useRef(0)
 
   // Track the available voices (they load asynchronously in most browsers).
   useEffect(() => {
@@ -102,8 +104,12 @@ function EntryDetails({
   // Stop any sound when leaving the entry or switching to a different word.
   useEffect(() => {
     return () => {
-      audioRef.current?.pause()
-      audioRef.current = null
+      // playTokenRef is a plain counter (not a DOM node), so reading the
+      // latest value on cleanup is intended.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      playTokenRef.current++
+      stopAudioRef.current?.()
+      stopAudioRef.current = null
       window.speechSynthesis?.cancel()
     }
   }, [entry.word])
@@ -145,7 +151,10 @@ function EntryDetails({
   }
 
   const playAudio = () => {
-    audioRef.current?.pause()
+    // Invalidate any clip that is still loading and stop whatever is playing.
+    const token = ++playTokenRef.current
+    stopAudioRef.current?.()
+    stopAudioRef.current = null
     window.speechSynthesis?.cancel()
 
     // Prefer a real recording; fall back to a German TTS voice if one exists.
@@ -155,18 +164,20 @@ function EntryDetails({
       speak()
       return
     }
-    const audio = new Audio(src)
-    audioRef.current = audio
-    audio.onplay = () => setIsPlaying(true)
-    audio.onended = () => setIsPlaying(false)
-    audio.onerror = () => {
-      setIsPlaying(false)
-      speak()
-    }
-    audio.play().catch(() => {
-      setIsPlaying(false)
-      speak()
-    })
+    setIsPlaying(true)
+    playNormalized(src, () => setIsPlaying(false))
+      .then((stop) => {
+        if (token !== playTokenRef.current) {
+          stop()
+          return
+        }
+        stopAudioRef.current = stop
+      })
+      .catch(() => {
+        if (token !== playTokenRef.current) return
+        setIsPlaying(false)
+        speak()
+      })
   }
 
   return (
