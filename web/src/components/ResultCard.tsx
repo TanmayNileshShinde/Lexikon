@@ -29,10 +29,10 @@ export function ResultCard({
         onClick={() => onSelect(result.id)}
         aria-label={`Open full entry for ${result.word}`}
         aria-current={isKeyboardSelected ? 'true' : undefined}
-        className={`group relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:border-slate-700/60 hover:bg-[#1E293B]/40 hover:shadow-2xl active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+        className={`group relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:border-slate-700/60 hover:bg-slate-800/40 hover:shadow-2xl active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
           isKeyboardSelected
-            ? 'border-slate-700/60 bg-[#1E293B]/40 shadow-2xl'
-            : 'border-slate-800/40 bg-[#0F172A]/40 shadow-lg'
+            ? 'border-slate-700/60 bg-slate-800/40 shadow-2xl'
+            : 'border-slate-800/40 bg-slate-900/40 shadow-lg'
         }`}
       >
         {/* left accent */}
