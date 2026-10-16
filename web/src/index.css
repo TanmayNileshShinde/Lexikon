@@ -5,6 +5,13 @@
   /* Flat UI: solid canvas and square-ish corners everywhere. */
   --color-canvas-from: #0b1020;
 
+  /* Entry card: one panel with a thin border (Jiten-style) in the page's own slate palette:
+     the same tones as the search box and the result cards (slate-900 / 800 / 700) */
+  --color-card: #0f172a;
+  --color-card-edge: #1e293b;
+  --color-card-edge-strong: #334155;
+  --radius-card: 6px;
+
   --radius-xs: 2px;
   --radius-sm: 2px;
   --radius-md: 2px;
@@ -27,6 +34,9 @@
   color-scheme: light;
   --color-white: oklch(20.8% 0.042 265.755);
   --color-canvas-from: #ffffff;
+  --color-card: #ffffff;
+  --color-card-edge: #e5e5e5;
+  --color-card-edge-strong: #d4d4d4;
   --color-slate-50: oklch(12.9% 0.042 264.695);
   --color-slate-100: oklch(20.8% 0.042 265.755);
   --color-slate-200: oklch(27.9% 0.041 260.031);
