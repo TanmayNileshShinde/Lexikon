@@ -116,6 +116,86 @@ function runSuggest(query: string, limit: number): SuggestResult[] {
   });
 }
 
+export interface AutocompleteItem {
+  id: number;
+  word: string;
+  pos: string;
+}
+
+// Prefix suggestions over headword keys, most "important" first. An exact
+// match of the typed text always leads; then single words come before
+// multi-word phrases/idioms; within each group entries are
+// ranked by weight (the size of the entry, a popularity proxy). Matches on
+// any of the three folded key kinds, so "madch" and "mädch" both find
+// "Mädchen".
+const AC_TABLE_SQL = `
+  SELECT entry_id AS id, word, pos, MAX(weight) AS weight,
+         MAX(key IN (@a0, @a1, @a2)) AS exact
+  FROM autocomplete
+  WHERE (kind = 0 AND key >= @a0 AND key < @b0)
+     OR (kind = 1 AND key >= @a1 AND key < @b1)
+     OR (kind = 2 AND key >= @a2 AND key < @b2)
+  GROUP BY entry_id
+  ORDER BY exact DESC, (instr(word, ' ') > 0) ASC, weight DESC,
+           length(word) ASC, word ASC
+  LIMIT @limit
+`;
+
+// Fallback for databases built before the autocomplete table existed.
+const AC_FALLBACK_SQL = `
+  SELECT e.id AS id, e.word AS word, e.pos AS pos, length(e.data) AS weight,
+         MAX(k.key IN (@a0, @a1, @a2)) AS exact
+  FROM search_keys k
+  JOIN entries e ON e.id = k.entry_id
+  WHERE k.exact_form = 1 AND (
+        (k.kind = 0 AND k.key >= @a0 AND k.key < @b0)
+     OR (k.kind = 1 AND k.key >= @a1 AND k.key < @b1)
+     OR (k.kind = 2 AND k.key >= @a2 AND k.key < @b2))
+  GROUP BY e.id
+  ORDER BY exact DESC, (instr(e.word, ' ') > 0) ASC, weight DESC,
+           length(e.word) ASC, e.word ASC
+  LIMIT @limit
+`;
+
+const hasAutocompleteTable =
+  db
+    .prepare<[], { n: number }>(
+      "SELECT count(*) AS n FROM sqlite_master WHERE type = 'table' AND name = 'autocomplete'",
+    )
+    .get()!.n > 0;
+
+const autocompleteStmt = db.prepare<
+  [Record<string, unknown>],
+  { id: number; word: string; pos: string; weight: number }
+>(hasAutocompleteTable ? AC_TABLE_SQL : AC_FALLBACK_SQL);
+
+export function autocomplete(query: string, limit = 8): AutocompleteItem[] {
+  // "sich ver..." -> complete the part after the reflexive pronoun.
+  const trimmed = query.trim().replace(/^sich\s+/i, "");
+  if (!trimmed) return [];
+  const folded = foldQuery(trimmed);
+  const max = Math.min(Math.max(limit, 1), 15);
+  const bounds = {
+    a0: folded.exact,
+    b0: folded.exact + "\uffff",
+    a1: folded.translit,
+    b1: folded.translit + "\uffff",
+    a2: folded.strip,
+    b2: folded.strip + "\uffff",
+  };
+  // Over-fetch: homographs (Haus noun / Haus name) collapse into one word.
+  const rows = autocompleteStmt.all({ ...bounds, limit: max * 4 });
+  const seen = new Set<string>();
+  const out: AutocompleteItem[] = [];
+  for (const row of rows) {
+    if (seen.has(row.word)) continue;
+    seen.add(row.word);
+    out.push({ id: row.id, word: row.word, pos: row.pos });
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 /** "sich verlieben" -> "verlieben"; null when there is no reflexive prefix. */
 const REFLEXIVE_RE = /^sich\s+(.+)$/i;
 

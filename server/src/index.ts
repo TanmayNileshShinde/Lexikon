@@ -12,7 +12,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { getEntry, stats, suggest } from "./db.js";
+import { autocomplete, getEntry, stats, suggest } from "./db.js";
 import { foldQuery } from "./fold.js";
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -42,7 +42,12 @@ app.use(
 app.get("/", (c) =>
   c.json({
     name: "german-dict-api",
-    endpoints: ["/api/health", "/api/suggest?q=", "/api/entry/:id"],
+    endpoints: [
+      "/api/health",
+      "/api/suggest?q=",
+      "/api/autocomplete?q=",
+      "/api/entry/:id",
+    ],
   }),
 );
 
@@ -66,6 +71,16 @@ app.get("/api/suggest", (c) => {
     count: outcome.results.length,
     results: outcome.results,
   });
+});
+
+app.get("/api/autocomplete", (c) => {
+  const q = (c.req.query("q") ?? "").trim();
+  if (!q) {
+    return c.json({ query: q, suggestions: [] });
+  }
+  const limitParam = Number(c.req.query("limit") ?? 8);
+  const limit = Number.isFinite(limitParam) ? limitParam : 8;
+  return c.json({ query: q, suggestions: autocomplete(q, limit) });
 });
 
 app.get("/api/entry/:id", (c) => {
