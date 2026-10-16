@@ -290,7 +290,7 @@ function EntryDetails({
                 key={item.word}
                 type="button"
                 onClick={() => onSelectTerm(item.word)}
-                className="flex cursor-pointer items-center rounded-xl border border-slate-800 bg-[#0F172A]/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition-all duration-300 hover:border-violet-800/50 hover:bg-violet-950/40 hover:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+                className="flex cursor-pointer items-center rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition-all duration-300 hover:border-violet-800/50 hover:bg-violet-950/40 hover:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
               >
                 {item.word}
                 {item.roman && (
