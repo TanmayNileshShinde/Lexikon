@@ -37,6 +37,14 @@ export interface SuggestResult {
   exactForm: boolean;
 }
 
+export interface SuggestOutcome {
+  /** The query actually used to obtain the results. */
+  effectiveQuery: string;
+  /** True when a leading reflexive pronoun ("sich ") was dropped to match. */
+  reflexFallback: boolean;
+  results: SuggestResult[];
+}
+
 interface RawSuggestRow {
   id: number;
   kind: number;
@@ -81,7 +89,7 @@ const entryStmt = db.prepare<[number], { data: string }>(
 const countStmt = db.prepare<[], { c: number }>("SELECT count(*) AS c FROM entries");
 const keysStmt = db.prepare<[], { c: number }>("SELECT count(*) AS c FROM search_keys");
 
-export function suggest(query: string, limit = 25): SuggestResult[] {
+function runSuggest(query: string, limit: number): SuggestResult[] {
   const folded = foldQuery(query);
   const rows = suggestStmt.all({
     k0: folded.exact,
@@ -106,6 +114,30 @@ export function suggest(query: string, limit = 25): SuggestResult[] {
       exactForm: row.exact_form === 1,
     };
   });
+}
+
+/** "sich verlieben" -> "verlieben"; null when there is no reflexive prefix. */
+const REFLEXIVE_RE = /^sich\s+(.+)$/i;
+
+export function suggest(query: string, limit = 25): SuggestOutcome {
+  const trimmed = query.trim();
+  const direct = runSuggest(trimmed, limit);
+  if (direct.length > 0) {
+    return { effectiveQuery: trimmed, reflexFallback: false, results: direct };
+  }
+
+  // The source lemmatises reflexive verbs without the pronoun ("verlieben"),
+  // but users search them the way they are spoken: "sich verlieben". When the
+  // full phrase matches nothing, retry with the leading pronoun removed.
+  const rest = trimmed.match(REFLEXIVE_RE)?.[1]?.trim();
+  if (rest) {
+    const fallback = runSuggest(rest, limit);
+    if (fallback.length > 0) {
+      return { effectiveQuery: rest, reflexFallback: true, results: fallback };
+    }
+  }
+
+  return { effectiveQuery: trimmed, reflexFallback: false, results: direct };
 }
 
 export function getEntry(id: number): Record<string, unknown> | null {

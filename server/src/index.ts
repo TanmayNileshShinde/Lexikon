@@ -56,13 +56,15 @@ app.get("/api/suggest", (c) => {
   const limitParam = Number(c.req.query("limit") ?? 25);
   const limit = Number.isFinite(limitParam) ? limitParam : 25;
 
-  const folded = foldQuery(q);
-  const results = suggest(q, limit);
+  const outcome = suggest(q, limit);
+  const folded = foldQuery(outcome.effectiveQuery);
   return c.json({
     query: q,
+    resolvedQuery: outcome.effectiveQuery,
+    reflexFallback: outcome.reflexFallback,
     folded: { exact: folded.exact, translit: folded.translit, strip: folded.strip },
-    count: results.length,
-    results,
+    count: outcome.results.length,
+    results: outcome.results,
   });
 });
 

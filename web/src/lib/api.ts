@@ -13,6 +13,10 @@ export interface SuggestResult {
 
 export interface SuggestResponse {
   query: string
+  /** Query the results were actually resolved with (may drop a "sich " prefix). */
+  resolvedQuery?: string
+  /** True when a leading reflexive pronoun was dropped to match the lemma. */
+  reflexFallback?: boolean
   folded: { exact: string; translit: string; strip: string }
   count: number
   results: SuggestResult[]
