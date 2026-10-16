@@ -8,8 +8,8 @@ export type SearchStatus = 'idle' | 'loading' | 'ready' | 'error'
  * Search state lives here (owned by App) rather than inside the Search view,
  * so switching to the entry view and back never loses the query or results.
  */
-export function useSearch(debounceMs = 175) {
-  const [query, setQuery] = useState('')
+export function useSearch(debounceMs = 175, initialQuery = '') {
+  const [query, setQuery] = useState(initialQuery)
   const debouncedQuery = useDebouncedValue(query, debounceMs)
 
   const [results, setResults] = useState<SuggestResult[]>([])

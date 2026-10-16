@@ -9,6 +9,10 @@ interface EntryViewProps {
   id: number
   onBack: () => void
   onSelectTerm: (term: string) => void
+  /** Called once the entry has been fetched (used to sync the URL). */
+  onLoaded?: (entry: Entry) => void
+  /** Called when the id no longer exists (404). */
+  onMissing?: () => void
 }
 
 const RELATION_LABELS: { key: RelationKey; label: string }[] = [
@@ -301,8 +305,26 @@ function EntryDetails({
   )
 }
 
-export function EntryView({ id, onBack, onSelectTerm }: EntryViewProps) {
-  const { entry, status, error } = useEntry(id)
+export function EntryView({
+  id,
+  onBack,
+  onSelectTerm,
+  onLoaded,
+  onMissing,
+}: EntryViewProps) {
+  const { entry, status, error, notFound } = useEntry(id)
+
+  // Callbacks are kept out of the deps on purpose: they only need to fire
+  // when the loaded entry (or a 404) changes, not on every parent render.
+  useEffect(() => {
+    if (entry && status === 'ready') onLoaded?.(entry)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entry, status])
+
+  useEffect(() => {
+    if (notFound) onMissing?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notFound])
 
   return (
     <section className="animate-fade-in-up">
