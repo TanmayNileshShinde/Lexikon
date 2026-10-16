@@ -10,7 +10,7 @@ ARG VITE_API_BASE
 ENV VITE_API_BASE=$VITE_API_BASE
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.29-alpine
 # nginx's entrypoint renders *.template files with env vars (PORT).
 COPY deploy/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
