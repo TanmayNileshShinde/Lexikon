@@ -4,4 +4,4 @@
 # argparse, pathlib, time) - there are no hard third-party dependencies.
 # tqdm is optional and only provides the progress bar for large dumps;
 # ingest.py falls back to plain log lines without it.
-tqdm>=4.66
+tqdm>=4.70.1
