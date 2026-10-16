@@ -17,6 +17,14 @@ Schema:
     kind 0 = exact    NFC + lowercase           "schön"   -> "schön"
     kind 1 = translit ä→ae ö→oe ü→ue ß→ss       "schön"   -> "schoen"
     kind 2 = strip    ä→a  ö→o  ü→u  ß→s        "schön"   -> "schon"
+    kind 3 = english  word taken from a gloss    "to go"   -> "go"   (reverse search)
+
+    For kind 3, exact_form is a relevance score (higher is better), not a flag:
+        4  a whole translation of the first sense        "to go"      -> go
+        3  a whole translation of a later sense
+        2  a word of the headline glosses (first sense, first glosses)
+        1  a word found anywhere else in the glosses
+    These keys are never used for autocomplete.
 
     Every entry gets all three keys (even when the folded values coincide) so
     that query-time lookups are symmetric: a query for "Fuß" transforms to
@@ -45,6 +53,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sqlite3
 import sys
 import time
@@ -62,7 +71,13 @@ FALLBACK_EVERY_LINES = 500_000
 KIND_EXACT = 0
 KIND_TRANSLIT = 1
 KIND_STRIP = 2
-KIND_NAMES = {KIND_EXACT: "exact", KIND_TRANSLIT: "translit", KIND_STRIP: "strip"}
+KIND_ENGLISH = 3
+KIND_NAMES = {
+    KIND_EXACT: "exact",
+    KIND_TRANSLIT: "translit",
+    KIND_STRIP: "strip",
+    KIND_ENGLISH: "english",
+}
 
 TRANSLIT_TABLE = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"})
 STRIP_TABLE = str.maketrans({"ä": "a", "ö": "o", "ü": "u", "ß": "s"})
@@ -128,6 +143,98 @@ def iter_keys(word: str):
     yield KIND_EXACT, exact_key(word)
     yield KIND_TRANSLIT, translit_key(word)
     yield KIND_STRIP, strip_key(word)
+
+
+# --------------------------------------------------------------------------- #
+# Reverse (English -> German) search keys
+# --------------------------------------------------------------------------- #
+# Words that carry no meaning on their own: articles, prepositions, conjunctions and the
+# placeholders glosses use ("to give something to someone"). Content words such as "be",
+# "have" or "not" are kept on purpose: they are the main translation of sein, haben, nicht.
+ENGLISH_STOPWORDS = frozenset(
+    """
+    a an the of in on at by for with from into onto and or as to it its
+    that which who whom whose this these those
+    one ones oneself someone somebody something someones somebodys somethings
+    etc eg ie
+    """.split()
+)
+
+# "(of a person)", "[figuratively]": context labels, not translations
+_QUALIFIER_RE = re.compile(r"\([^)]*\)|\[[^\]]*\]")
+_ENGLISH_TOKEN_RE = re.compile(r"[a-z]+(?:'[a-z]+)?")
+
+# Glosses that describe the word itself instead of translating it ("alternative spelling of
+# Haus", "plural of ...", "obsolete form of ..."): indexing them would make "spelling" or
+# "alternative" match thousands of unrelated entries.
+_META_GLOSS_RE = re.compile(
+    r"^(?:\S+\s+){0,6}?(?:"
+    r"spelling|variant|abbreviation|initialism|acronym|contraction|clipping|misspelling|"
+    r"romanization|synonym|diminutive|"
+    r"plural|genitive|dative|accusative|nominative|participle|"
+    r"(?:alternative|inflected|obsolete|archaic|dated|nonstandard|informal|rare|older) form"
+    r")\s+(?:\S+\s+){0,3}?of\b"
+)
+
+# The first glosses of the first sense are the entry's headline translation
+HEADLINE_GLOSSES = 3
+# Relevance of an English key (stored in search_keys.exact_form for kind 3)
+SCORE_WHOLE_FIRST_SENSE = 4
+SCORE_WHOLE_LATER_SENSE = 3
+SCORE_HEADLINE = 2
+SCORE_MENTION = 1
+# Upper bound of distinct English keys per entry (very long entries would otherwise dominate)
+MAX_ENGLISH_KEYS = 60
+
+
+def english_tokens(gloss: str) -> list[str]:
+    """Lower-cased content words of one gloss, without qualifiers, punctuation or stopwords."""
+    text = unicodedata.normalize("NFC", gloss).lower().replace("\u2019", "'")
+    text = _QUALIFIER_RE.sub(" ", text).strip()
+    if _META_GLOSS_RE.match(text):
+        return []
+    out = []
+    for token in _ENGLISH_TOKEN_RE.findall(text):
+        token = token.removesuffix("'s")
+        if token in ENGLISH_STOPWORDS or token.endswith("'"):
+            continue
+        if len(token) < 2 and token != "i":  # keep "I" (ich), drop stray letters
+            continue
+        out.append(token)
+    return out
+
+
+def english_keys(senses: list[dict]) -> list[tuple[str, int]]:
+    """(key, score) pairs for the reverse index of one entry.
+
+    The score says how central the English word is to the entry (see SCORE_*): a gloss part
+    that is exactly that word ("water" for Wasser, "to go" for gehen) beats a word that only
+    appears inside a longer description ("a small house" for Häusl). Senses are visited in
+    order and the best score per word wins, so the per-entry cap drops the least relevant
+    keys last.
+    """
+    keys: dict[str, int] = {}
+    for sense_index, sense in enumerate(senses):
+        for gloss_index, gloss in enumerate(sense.get("glosses") or []):
+            headline = sense_index == 0 and gloss_index < HEADLINE_GLOSSES
+            # Drop the qualifiers *before* splitting: they may contain commas or semicolons
+            # ("book (collection of sheets; long work)") that are not separators.
+            plain = _QUALIFIER_RE.sub(" ", gloss)
+            for part in re.split(r"[;,]", plain):
+                tokens = english_tokens(part)
+                whole = len(tokens) == 1
+                for token in tokens:
+                    if whole:
+                        score = SCORE_WHOLE_FIRST_SENSE if sense_index == 0 else SCORE_WHOLE_LATER_SENSE
+                    elif headline:
+                        score = SCORE_HEADLINE
+                    else:
+                        score = SCORE_MENTION
+                    if token in keys:
+                        keys[token] = max(keys[token], score)
+                    elif len(keys) < MAX_ENGLISH_KEYS:
+                        keys[token] = score
+    return list(keys.items())
 
 
 # --------------------------------------------------------------------------- #
@@ -440,7 +547,7 @@ def _build_autocomplete(conn: sqlite3.Connection) -> None:
         SELECT k.kind, k.key, k.entry_id, e.word, e.pos, length(e.data)
         FROM search_keys k
         JOIN entries e ON e.id = k.entry_id
-        WHERE k.exact_form = 1
+        WHERE k.exact_form = 1 AND k.kind < 3
         """
     )
 
@@ -561,6 +668,8 @@ def run(input_path: Path, output_path: Path, batch_size: int) -> dict:
             for form in record["forms"]:
                 for kind, key in iter_keys(form["form"]):
                     key_rows.append((key, kind, next_id, 0))
+            for key, score in english_keys(senses):
+                key_rows.append((key, KIND_ENGLISH, next_id, score))
 
             if len(entry_rows) >= batch_size:
                 flush()
