@@ -54,6 +54,37 @@ export function Footer() {
           <span className="text-slate-300">Frodouwu</span>
         </p>
       </div>
+
+      <p className="mx-auto w-full max-w-2xl px-4 pb-8 text-center text-xs text-slate-500 sm:text-left">
+        Dictionary data from{' '}
+        <a
+          href="https://de.wiktionary.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-violet-400"
+        >
+          Wiktionary
+        </a>{' '}
+        via{' '}
+        <a
+          href="https://kaikki.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-violet-400"
+        >
+          kaikki.org
+        </a>
+        , licensed under{' '}
+        <a
+          href="https://creativecommons.org/licenses/by-sa/4.0/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-violet-400"
+        >
+          CC BY-SA 4.0
+        </a>
+        .
+      </p>
     </footer>
   )
 }
