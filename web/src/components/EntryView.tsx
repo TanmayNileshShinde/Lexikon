@@ -187,8 +187,8 @@ function EntryDetails({
   return (
     <article className="flex flex-col gap-8">
       <header>
-        <div className="flex items-baseline gap-4">
-          <h2 className="text-5xl font-black tracking-tight text-white md:text-6xl">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h2 className="min-w-0 text-4xl font-black tracking-tight text-white [overflow-wrap:anywhere] sm:text-5xl md:text-6xl">
             {entry.word}
           </h2>
           <button
@@ -201,7 +201,7 @@ function EntryDetails({
                 ? 'Listen to pronunciation'
                 : 'No recording or German voice available on this device'
             }
-            className={`transition-colors enabled:cursor-pointer enabled:hover:text-violet-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+            className={`-m-2 p-2 transition-colors enabled:cursor-pointer enabled:hover:text-violet-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
               isPlaying ? 'animate-pulse text-violet-400' : 'text-slate-500'
             }`}
           >
@@ -281,7 +281,7 @@ function EntryDetails({
 
       {relations.map((section) => (
         <section key={section.label}>
-          <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
             {section.label}
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -290,7 +290,7 @@ function EntryDetails({
                 key={item.word}
                 type="button"
                 onClick={() => onSelectTerm(item.word)}
-                className="flex cursor-pointer items-center rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition-all duration-300 hover:border-violet-800/50 hover:bg-violet-950/40 hover:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+                className="flex min-h-9 max-w-full cursor-pointer items-center rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2 text-left text-xs font-medium [overflow-wrap:anywhere] text-slate-300 transition-all duration-300 hover:border-violet-800/50 hover:bg-violet-950/40 hover:text-violet-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
               >
                 {item.word}
                 {item.roman && (
@@ -331,7 +331,7 @@ export function EntryView({
       <button
         type="button"
         onClick={onBack}
-        className="group mb-6 flex cursor-pointer items-center gap-2 text-sm text-slate-400 transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+        className="group mb-4 flex min-h-10 cursor-pointer items-center gap-2 text-sm text-slate-400 transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
       >
         <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">
           ←
