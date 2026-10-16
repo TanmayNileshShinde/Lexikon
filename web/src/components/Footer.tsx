@@ -2,7 +2,7 @@ const REPO_URL = 'https://github.com/julianel5/Lexikon'
 const KOFI_URL = 'https://ko-fi.com/muzzijoaquin'
 
 const linkClass =
-  'inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500'
+  'inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500'
 
 export function Footer() {
   return (
