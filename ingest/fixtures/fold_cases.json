@@ -1,0 +1,16 @@
+[
+  { "input": "Haus", "exact": "haus", "translit": "haus", "strip": "haus" },
+  { "input": "Schön", "exact": "schön", "translit": "schoen", "strip": "schon" },
+  { "input": "Fuß", "exact": "fuß", "translit": "fuss", "strip": "fus" },
+  { "input": "Fuss", "exact": "fuss", "translit": "fuss", "strip": "fuss" },
+  { "input": "STRASSE", "exact": "strasse", "translit": "strasse", "strip": "strasse" },
+  { "input": "Äpfel", "exact": "äpfel", "translit": "aepfel", "strip": "apfel" },
+  { "input": "ÜBER", "exact": "über", "translit": "ueber", "strip": "uber" },
+  { "input": "Öl", "exact": "öl", "translit": "oel", "strip": "ol" },
+  { "input": "ß", "exact": "ß", "translit": "ss", "strip": "s" },
+  { "input": "GROẞ", "exact": "groß", "translit": "gross", "strip": "gros" },
+  { "input": "Müller", "exact": "müller", "translit": "mueller", "strip": "muller" },
+  { "input": "Café", "exact": "café", "translit": "café", "strip": "café" },
+  { "input": "sich verlieben", "exact": "sich verlieben", "translit": "sich verlieben", "strip": "sich verlieben" },
+  { "input": "Mädchen", "exact": "mädchen", "translit": "maedchen", "strip": "madchen" }
+]
