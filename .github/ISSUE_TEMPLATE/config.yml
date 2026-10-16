@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/julianel5/Lexikon/security/advisories/new
+    about: Please report security problems privately, not in a public issue.
+  - name: Report a mistake in the dictionary content
+    url: https://de.wiktionary.org/
+    about: Definitions, examples and inflection tables come from Wiktionary; errors in the content itself are best fixed there.
