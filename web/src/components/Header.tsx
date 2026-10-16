@@ -18,7 +18,7 @@ export function Header({ onHome }: HeaderProps) {
               e.preventDefault()
               onHome()
             }}
-            className="rounded-lg text-white no-underline transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
+            className="inline-flex min-h-10 items-center rounded-lg text-white no-underline transition-colors hover:text-violet-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500"
           >
             Lexikon
           </a>
