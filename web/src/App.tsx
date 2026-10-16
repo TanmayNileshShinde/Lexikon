@@ -112,16 +112,7 @@ export default function App() {
   }, [resolveBySlug])
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-gradient-to-tr from-canvas-from via-canvas-via to-canvas-to font-sans text-slate-100 antialiased selection:bg-violet-500/30 selection:text-violet-200">
-      {/* cosmic backdrop */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-[-10rem] top-[-10rem] h-[40rem] w-[40rem] rounded-full bg-violet-600/10 blur-[120px]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-[5rem] right-[-10rem] h-[30rem] w-[30rem] rounded-full bg-cyan-600/10 blur-[120px]"
-      />
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-canvas-from font-sans text-slate-100 antialiased selection:bg-violet-500/30 selection:text-violet-200">
 
       <Header onHome={() => showSearch('')} />
 

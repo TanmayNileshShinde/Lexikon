@@ -29,16 +29,16 @@ export function ResultCard({
         onClick={() => onSelect(result.id)}
         aria-label={`Open full entry for ${result.word}`}
         aria-current={isKeyboardSelected ? 'true' : undefined}
-        className={`group relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:border-slate-700/60 hover:bg-slate-800/40 hover:shadow-2xl active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+        className={`group relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:border-slate-700/60 hover:bg-slate-800/40 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
           isKeyboardSelected
-            ? 'border-slate-700/60 bg-slate-800/40 shadow-2xl'
-            : 'border-slate-800/40 bg-slate-900/40 shadow-lg'
+            ? 'border-slate-700/60 bg-slate-800/40'
+            : 'border-slate-800/40 bg-slate-900/40'
         }`}
       >
         {/* left accent */}
         <span
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 left-0 w-0.5 origin-center bg-gradient-to-b from-violet-500 to-cyan-400 transition-transform duration-300 group-hover:scale-y-100 ${
+          className={`pointer-events-none absolute inset-y-0 left-0 w-0.5 origin-center bg-violet-500 transition-transform duration-300 group-hover:scale-y-100 ${
             isKeyboardSelected ? 'scale-y-100' : 'scale-y-0'
           }`}
         />
