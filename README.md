@@ -1,8 +1,16 @@
 # Lexikon
 
-A minimalist, ad-free **German → English dictionary**. Search-first UI, instant
-typeahead with umlaut/ß folding, and rich entry pages (IPA, morphology, senses,
-examples and relations).
+A minimalist, ad-free **German → English dictionary**. Search-first UI, as-you-type
+suggestions, umlaut/ß folding, and rich entry pages (IPA and native-speaker audio,
+morphology, senses, examples and relations).
+
+[![CI](https://github.com/julianel5/Lexikon/actions/workflows/ci.yml/badge.svg)](https://github.com/julianel5/Lexikon/actions/workflows/ci.yml)
+[![Live site](https://img.shields.io/badge/live-lexikon.up.railway.app-7c3aed)](https://lexikon.up.railway.app)
+
+<p align="center">
+  <img src="docs/screenshots/desktop.jpg" alt="Lexikon on a computer: the entry for Doppelgänger with its IPA, article, genitive and plural, a sense and an example" width="68%">
+  <img src="docs/screenshots/phone.jpg" alt="Lexikon on a phone: the search box with as-you-type suggestions for 'haus'" width="25%">
+</p>
 
 ```
 kaikki.org German JSONL  ──►  ingest/ingest.py  ──►  data/dictionary.db  ──►  server (Hono)  ──►  web (React)
@@ -30,12 +38,16 @@ kaikki.org German JSONL  ──►  ingest/ingest.py  ──►  data/dictionary
 │   ├── raw/           # downloaded dump
 │   └── dictionary.db
 ├── server/            # Hono + better-sqlite3 API
+│   ├── Dockerfile
 │   └── src/{index,db,fold}.ts
 ├── web/               # React + Vite + Tailwind UI
+│   ├── Dockerfile
 │   └── src/
-│       ├── components/  # Search, ResultCard, EntryView, ...
-│       └── lib/         # api, useSearch, useEntry, morphology
-└── deploy/            # deployment notes (placeholder)
+│       ├── components/  # Search, SearchBar, ResultCard, EntryView, Header, Footer...
+│       └── lib/         # api, search/autocomplete/entry hooks, routing, theme, audio
+├── deploy/            # nginx config used by web/Dockerfile
+├── docs/              # screenshots
+└── .github/           # CI, issue forms, PR template, dependabot
 ```
 
 ## Prerequisites
@@ -54,7 +66,7 @@ python -m pip install -r ingest/requirements.txt
 curl -L -o data/raw/kaikki.org-dictionary-German.jsonl \
   https://kaikki.org/dictionary/German/kaikki.org-dictionary-German.jsonl
 
-# Build data/dictionary.db (~100 s, ~426 MB)
+# Build data/dictionary.db (~100 s, ~467 MB)
 python ingest/ingest.py data/raw/kaikki.org-dictionary-German.jsonl -o data/dictionary.db
 ```
 
@@ -142,6 +154,27 @@ curl "http://localhost:3000/api/suggest?q=schoen"
 }
 ```
 
+### `GET /api/autocomplete?q={text}&limit={n}`
+
+Headword suggestions for what is being typed (prefix match, folded like search, so
+`madch` and `mädch` both find *Mädchen*). Ranked: exact match first, single words before
+phrases, then by how well documented the entry is. `limit` defaults to 8 (max 15).
+
+```bash
+curl "http://localhost:3000/api/autocomplete?q=ver&limit=3"
+```
+
+```json
+{
+  "query": "ver",
+  "suggestions": [
+    { "id": 1994, "word": "verstehen", "pos": "verb" },
+    { "id": 22697, "word": "versichern", "pos": "verb" },
+    { "id": 56111, "word": "verballhornen", "pos": "verb" }
+  ]
+}
+```
+
 ### `GET /api/entry/:id`
 
 Full stored entry as JSON (forms, senses, examples, sounds, relations).
@@ -188,9 +221,20 @@ CREATE TABLE search_keys (
 ) WITHOUT ROWID;
 
 CREATE INDEX idx_entries_word_pos ON entries(word, pos);
+
+-- headword keys only, used for as-you-type suggestions
+CREATE TABLE autocomplete (
+  kind     INTEGER NOT NULL,
+  key      TEXT    NOT NULL,
+  entry_id INTEGER NOT NULL,
+  word     TEXT    NOT NULL,
+  pos      TEXT    NOT NULL,
+  weight   INTEGER NOT NULL,      -- size of the entry JSON, a popularity proxy
+  PRIMARY KEY (kind, key, entry_id)
+) WITHOUT ROWID;
 ```
 
-Current build: **102,740 entries**, **3,788,997 search keys**, ~426 MB.
+Current build: **102,740 entries**, **3,788,997 search keys**, ~467 MB.
 
 ## Notes
 
