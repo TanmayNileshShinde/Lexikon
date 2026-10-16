@@ -195,4 +195,19 @@ Current build: **102,740 entries**, **3,788,997 search keys**, ~426 MB.
 ## Notes
 
 - `data/raw/*` and `data/*.db` are **not** committed — rebuild them with step 1.
-- Lexical data is derived from Wiktionary via kaikki.org (CC BY-SA).
+- Lexical data is derived from Wiktionary via kaikki.org (CC BY-SA 4.0); see
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Contributing
+
+Bug reports, wrong or missing entries and pull requests are welcome: read
+[CONTRIBUTING.md](CONTRIBUTING.md) first. Security issues: [SECURITY.md](SECURITY.md). This
+project follows a [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## License
+
+The code is released under the [MIT License](LICENSE). The dictionary data is **not** MIT: it
+comes from [Wiktionary](https://de.wiktionary.org/) and is available under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), so a database built from it
+must keep that licence and credit Wiktionary. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
