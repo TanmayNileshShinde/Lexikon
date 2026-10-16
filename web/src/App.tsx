@@ -143,6 +143,8 @@ export default function App() {
             status={search.status}
             error={search.error}
             loading={search.loading}
+            resolvedQuery={search.resolvedQuery}
+            reflexFallback={search.reflexFallback}
             onQueryChange={search.setQuery}
             onSelect={showEntry}
           />

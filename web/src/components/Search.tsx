@@ -10,6 +10,8 @@ interface SearchProps {
   status: SearchStatus
   error: string | null
   loading: boolean
+  resolvedQuery: string
+  reflexFallback: boolean
   onQueryChange: (value: string) => void
   onSelect: (id: number) => void
 }
@@ -20,6 +22,8 @@ export function Search({
   status,
   error,
   loading,
+  resolvedQuery,
+  reflexFallback,
   onQueryChange,
   onSelect,
 }: SearchProps) {
@@ -56,6 +60,12 @@ export function Search({
         onChange={onQueryChange}
         onKeyDown={handleKeyDown}
       />
+      {status === 'ready' && reflexFallback && results.length > 0 && (
+        <p className="mt-3 px-1 text-sm text-slate-400">
+          Showing results for{' '}
+          <span className="font-semibold text-violet-300">“{resolvedQuery}”</span>
+        </p>
+      )}
       {status === 'ready' && results.length > 0 && (
         <p className="mt-3 px-1 text-xs font-medium uppercase tracking-widest text-slate-500">
           {results.length} {results.length === 1 ? 'result' : 'results'}

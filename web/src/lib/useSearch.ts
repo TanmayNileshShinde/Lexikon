@@ -15,6 +15,10 @@ export function useSearch(debounceMs = 175, initialQuery = '') {
   const [results, setResults] = useState<SuggestResult[]>([])
   const [status, setStatus] = useState<SearchStatus>('idle')
   const [error, setError] = useState<string | null>(null)
+  // Set when the server resolved the query to a different term (e.g. dropping
+  // the reflexive "sich " prefix from "sich verlieben" -> "verlieben").
+  const [resolvedQuery, setResolvedQuery] = useState('')
+  const [reflexFallback, setReflexFallback] = useState(false)
 
   const trimmed = debouncedQuery.trim()
 
@@ -23,6 +27,8 @@ export function useSearch(debounceMs = 175, initialQuery = '') {
       setResults([])
       setStatus('idle')
       setError(null)
+      setResolvedQuery('')
+      setReflexFallback(false)
       return
     }
 
@@ -33,11 +39,15 @@ export function useSearch(debounceMs = 175, initialQuery = '') {
     fetchSuggest(trimmed, controller.signal)
       .then((data) => {
         setResults(data.results)
+        setResolvedQuery(data.resolvedQuery ?? trimmed)
+        setReflexFallback(Boolean(data.reflexFallback))
         setStatus('ready')
       })
       .catch((err: unknown) => {
         if (err instanceof DOMException && err.name === 'AbortError') return
         setResults([])
+        setResolvedQuery('')
+        setReflexFallback(false)
         setError('Could not reach the dictionary API.')
         setStatus('error')
       })
@@ -56,5 +66,7 @@ export function useSearch(debounceMs = 175, initialQuery = '') {
     status,
     error,
     loading,
+    resolvedQuery,
+    reflexFallback,
   }
 }
