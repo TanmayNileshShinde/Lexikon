@@ -7,7 +7,7 @@ interface HeaderProps {
 
 export function Header({ onHome }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-800/60 bg-slate-900/70 backdrop-blur-md">
+    <header className="sticky top-0 z-20 border-b border-slate-800/60 bg-slate-900">
       <div className="mx-auto flex h-16 w-full max-w-2xl items-center justify-between px-4">
         <h1 className="m-0 text-2xl font-extrabold tracking-tight">
           <a
