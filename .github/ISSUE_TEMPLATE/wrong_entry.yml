@@ -1,0 +1,47 @@
+name: Wrong or missing entry
+description: A word is missing, has a wrong form, article or plural, or a search does not find it.
+labels: ["wrong entry"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Lexikon shows what Wiktionary says. If the entry is **wrong on Wiktionary itself**,
+        please fix it there (it helps everyone). Report it here when Wiktionary is right but
+        Lexikon shows or finds it wrongly.
+  - type: checkboxes
+    id: what
+    attributes:
+      label: What is wrong?
+      options:
+        - label: The word is missing
+        - label: A search does not find it (inflected form, umlaut, ß, "sich ...")
+        - label: Wrong article, gender or plural
+        - label: Wrong or missing forms (conjugation, declension)
+        - label: Wrong or missing translation or example
+        - label: Pronunciation / audio
+        - label: The suggestions in the search box
+  - type: input
+    id: word
+    attributes:
+      label: Word or search text
+      placeholder: "Mädchen, gegangen, sich verlieben"
+    validations:
+      required: true
+  - type: textarea
+    id: shows
+    attributes:
+      label: What Lexikon shows
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should be
+      description: The right answer and, if you can, a link to the Wiktionary page that shows it.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page or URL
+      placeholder: "/entry/34/Haus"
