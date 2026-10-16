@@ -29,6 +29,9 @@ Schema:
                     stored as entries, they only contribute redirect keys to
                     their lemma.
 
+    autocomplete(kind, key, entry_id, word, pos, weight)  -- headword keys only,
+        used for prefix suggestions (ranked by ``weight`` = entry size).
+
 Notes:
   * The database is built with journal_mode=OFF / synchronous=OFF for speed.
     This is safe here because the .db is a pure build artifact - if a run is
@@ -410,6 +413,38 @@ def _build_record(entry: dict, word: str, pos: str, senses: list[dict]) -> dict:
 # --------------------------------------------------------------------------- #
 # Pipeline
 # --------------------------------------------------------------------------- #
+AUTOCOMPLETE_SCHEMA = """
+CREATE TABLE autocomplete (
+    kind     INTEGER NOT NULL,
+    key      TEXT    NOT NULL,
+    entry_id INTEGER NOT NULL,
+    word     TEXT    NOT NULL,
+    pos      TEXT    NOT NULL,
+    weight   INTEGER NOT NULL,
+    PRIMARY KEY (kind, key, entry_id)
+) WITHOUT ROWID;
+"""
+
+
+def _build_autocomplete(conn: sqlite3.Connection) -> None:
+    """Narrow prefix-search table: one row per headword key.
+
+    ``weight`` is the size of the entry's JSON: well-documented (common)
+    words have much richer Wiktionary entries than abbreviations or rare
+    names, so it is a cheap popularity proxy for ranking suggestions.
+    """
+    conn.executescript(AUTOCOMPLETE_SCHEMA)
+    conn.execute(
+        """
+        INSERT INTO autocomplete (kind, key, entry_id, word, pos, weight)
+        SELECT k.kind, k.key, k.entry_id, e.word, e.pos, length(e.data)
+        FROM search_keys k
+        JOIN entries e ON e.id = k.entry_id
+        WHERE k.exact_form = 1
+        """
+    )
+
+
 def _connect(output: Path) -> sqlite3.Connection:
     if output.exists():
         output.unlink()
@@ -558,6 +593,9 @@ def run(input_path: Path, output_path: Path, batch_size: int) -> dict:
             flush()
             conn.commit()
     flush()
+    conn.commit()
+
+    _build_autocomplete(conn)
     conn.commit()
 
     conn.execute("ANALYZE")

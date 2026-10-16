@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import type { SuggestResult } from '../lib/api'
+import { useAutocomplete } from '../lib/useAutocomplete'
 import type { SearchStatus } from '../lib/useSearch'
 import { SearchBar } from './SearchBar'
 import { ResultsList } from './ResultsList'
@@ -30,12 +31,56 @@ export function Search({
   const hasQuery = query.trim() !== ''
   const [selectedIndex, setSelectedIndex] = useState(-1)
 
+  // --- autocomplete ----------------------------------------------------- //
+  const suggestions = useAutocomplete(query)
+  const [focused, setFocused] = useState(true)
+  // The query for which the dropdown was dismissed (pick / Esc); typing
+  // anything else re-opens it.
+  const [dismissedFor, setDismissedFor] = useState<string | null>(null)
+  const [activeSuggestion, setActiveSuggestion] = useState(-1)
+
+  const dropdownOpen =
+    focused && hasQuery && suggestions.length > 0 && dismissedFor !== query
+
   // Reset the keyboard highlight whenever the query or results change.
   useEffect(() => {
     setSelectedIndex(-1)
   }, [query, results])
 
+  useEffect(() => {
+    setActiveSuggestion(-1)
+  }, [query, suggestions])
+
+  const pickSuggestion = (word: string) => {
+    setDismissedFor(word)
+    onQueryChange(word)
+  }
+
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    // The open dropdown owns the arrow keys / Enter / Escape.
+    if (dropdownOpen) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        setActiveSuggestion((i) => Math.min(i + 1, suggestions.length - 1))
+        return
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        setActiveSuggestion((i) => Math.max(i - 1, -1))
+        return
+      }
+      if (event.key === 'Enter' && activeSuggestion >= 0) {
+        event.preventDefault()
+        pickSuggestion(suggestions[activeSuggestion]!.word)
+        return
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setDismissedFor(query)
+        return
+      }
+    }
+
     if (event.key === 'ArrowDown') {
       if (results.length === 0) return
       event.preventDefault()
@@ -59,6 +104,12 @@ export function Search({
         loading={loading}
         onChange={onQueryChange}
         onKeyDown={handleKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        suggestions={suggestions}
+        open={dropdownOpen}
+        activeIndex={activeSuggestion}
+        onPick={pickSuggestion}
       />
       {status === 'ready' && reflexFallback && results.length > 0 && (
         <p className="mt-3 px-1 text-sm text-slate-400">
