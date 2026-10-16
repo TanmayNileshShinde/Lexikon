@@ -2,9 +2,16 @@
 
 /* App canvas tokens (dark defaults, overridden for the light theme). */
 @theme {
-  --color-canvas-from: #060814;
-  --color-canvas-via: #0b0f1d;
-  --color-canvas-to: #0f172a;
+  /* Flat UI: solid canvas and square-ish corners everywhere. */
+  --color-canvas-from: #0b1020;
+
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
 }
 
 :root {
@@ -19,9 +26,7 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --color-white: oklch(20.8% 0.042 265.755);
-  --color-canvas-from: #f8fafc;
-  --color-canvas-via: #f1f5f9;
-  --color-canvas-to: #e2e8f0;
+  --color-canvas-from: #ffffff;
   --color-slate-50: oklch(12.9% 0.042 264.695);
   --color-slate-100: oklch(20.8% 0.042 265.755);
   --color-slate-200: oklch(27.9% 0.041 260.031);
