@@ -33,9 +33,9 @@ function getTenseGroup(tags: string[] | undefined): string {
   if (t.some((x) => x.includes('future'))) return 'Future'
   if (t.some((x) => x.includes('pluperfect') || x.includes('plusquamperfect'))) return 'Pluperfect'
   if (t.some((x) => x.includes('perfect'))) return 'Perfect'
-  if (t.some((x) => x.includes('preterite') || x.includes('past'))) return 'Preterite/Präteritum'
-  if (t.some((x) => x.includes('present') || x.includes('präsens'))) return 'Präsens'
-  if (t.some((x) => x.includes('subjunctive') || x.includes('subj') || x.includes('konjunktiv'))) return 'Subjunctive/Konjunktiv'
+  if (t.some((x) => x.includes('preterite') || x.includes('past'))) return 'Preterite'
+  if (t.some((x) => x.includes('present') || x.includes('präsens'))) return 'Present'
+  if (t.some((x) => x.includes('subjunctive') || x.includes('subj') || x.includes('konjunktiv'))) return 'Subjunctive'
   if (t.some((x) => x.includes('conditional'))) return 'Conditional'
   if (t.some((x) => x.includes('imperative'))) return 'Imperative'
   if (t.some((x) => x.includes('participle'))) return 'Participle'
@@ -81,13 +81,13 @@ export function MorphologyTable({ entry }: MorphologyTableProps) {
   }
 
   const verbTenses = [
-    'Präsens',
-    'Preterite/Präteritum',
+    'Present',
+    'Preterite',
     'Perfect',
     'Pluperfect',
     'Future',
     'Future Perfect',
-    'Subjunctive/Konjunktiv',
+    'Subjunctive',
     'Conditional',
     'Imperative',
     'Participle',

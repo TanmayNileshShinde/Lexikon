@@ -226,6 +226,10 @@ React 18 function components, hooks in `web/src/lib/`, Tailwind utility classes.
 - Search box is an accessible combobox (keyboard arrows/Enter/Esc); keep that behaviour. Show
   loading and error states as the existing components do.
 - Display words and forms exactly as stored (umlauts, `ß`, capitalization).
+- **The interface text is in English** (confirmed: owner's request). Labels, headings, buttons and credits
+  never use German or Spanish (`Present`, not `Präsens`). Only the dictionary's own content stays German:
+  headwords, forms, examples and the articles *der/die/das*. When matching Wiktionary tags in code
+  (`MorphologyTable.tsx`), the tags may be German; what is displayed must be English.
 - URLs are part of the interface: `/`, `/?q=…`, `/entry/<id>/<word>` (`web/src/lib/route.ts`).
 
 ## 10. Dependencies and security
