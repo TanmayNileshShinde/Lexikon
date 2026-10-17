@@ -14,7 +14,7 @@ export function Footer() {
       <div className="mx-auto flex w-full max-w-2xl items-start justify-between gap-4 px-4 py-8">
         <div className="min-w-0 space-y-2 text-xs text-slate-500">
           <p>
-            Sitio hecho por: <span className="text-slate-300">Julianel</span> y{' '}
+            Site made by: <span className="text-slate-300">Julianel</span> and{' '}
             <span className="text-slate-300">Frodouwu</span>
           </p>
           <p>

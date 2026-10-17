@@ -10,8 +10,11 @@ behaviour).
 
 ### Changed
 
-- The footer is simpler: the credits ("Sitio hecho por") have the same size as the data credits, and the
-  GitHub and Ko-fi links are plain icons on the right, without boxes.
+- The footer is simpler: the credits have the same size as the data credits, and the GitHub and Ko-fi
+  links are plain icons on the right, without boxes.
+- The whole interface is in English: the credits line ("Site made by") and the verb tense headings
+  (*Present*, *Preterite*, *Subjunctive* instead of *Präsens*, *Preterite/Präteritum*,
+  *Subjunctive/Konjunktiv*).
 - English searches put the standard word first: a match whose first sense is marked as archaic,
   regional, slang, humorous, childish or derogatory counts one step lower (*cat* gives *Katze* before
   the archaic *Bönhase*, *goodbye* gives *auf Wiedersehen* before the slang *bleib stabil*).
